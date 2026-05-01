@@ -1,0 +1,42 @@
+# Credentials — never commit these
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Alembic generated (keep versions/, ignore auto-generated pycache)
+alembic/versions/__pycache__/
+
+# Docker
+*.tar
+
+# Logs
+*.log
+logs/

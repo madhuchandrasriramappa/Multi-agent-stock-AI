@@ -1,0 +1,41 @@
+# ── Core ───────────────────────────────────────────────────────────────────────
+pydantic>=2.5
+pydantic-settings>=2.5
+python-dotenv>=1.0
+
+# ── Data ingestion ─────────────────────────────────────────────────────────────
+yfinance>=0.2.40
+requests>=2.31
+pandas>=2.2
+numpy>=1.26
+
+# ── Database ───────────────────────────────────────────────────────────────────
+psycopg2-binary>=2.9
+SQLAlchemy>=2.0
+alembic>=1.13
+
+# ── Azure SDK ──────────────────────────────────────────────────────────────────
+azure-identity>=1.16
+azure-keyvault-secrets>=4.8
+azure-servicebus>=7.12
+azure-monitor-opentelemetry>=1.6
+
+# ── OpenTelemetry ──────────────────────────────────────────────────────────────
+opentelemetry-sdk>=1.24
+
+# ── LLM — Azure OpenAI uses the openai Python SDK ─────────────────────────────
+openai>=1.35
+
+# ── Anomaly detection / ML ────────────────────────────────────────────────────
+scikit-learn>=1.5
+scipy>=1.13
+
+# ── CLI ────────────────────────────────────────────────────────────────────────
+click>=8.1
+
+# ── Structured logging ─────────────────────────────────────────────────────────
+structlog>=24.0
+
+# ── Testing ────────────────────────────────────────────────────────────────────
+pytest>=8.2
+pytest-asyncio>=0.23
