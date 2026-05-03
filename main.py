@@ -108,5 +108,13 @@ def status() -> None:
     click.echo()
 
 
+@cli.command()
+def migrate() -> None:
+    """Create database tables (safe to run repeatedly — skips existing tables)."""
+    from db.migrate import run_migrations
+    run_migrations()
+    click.echo("Database schema is up to date.")
+
+
 if __name__ == "__main__":
     cli()

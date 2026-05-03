@@ -1,0 +1,28 @@
+version: "3.9"
+
+# Free local PostgreSQL — identical engine to Azure PostgreSQL Flexible Server.
+# Usage:
+#   docker-compose up -d        # start in background
+#   docker-compose down         # stop (data persists in volume)
+#   docker-compose down -v      # stop AND delete data
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: stockai-pg
+    environment:
+      POSTGRES_DB: stockai
+      POSTGRES_USER: stockai_user
+      POSTGRES_PASSWORD: localdev123
+    ports:
+      - "5432:5432"
+    volumes:
+      - stockai_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockai_user -d stockai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  stockai_pg_data:
