@@ -157,5 +157,37 @@ class FeatureSet(Base):
         return f"<FeatureSet {self.symbol} {self.timestamp} rsi={self.rsi_14}>"
 
 
-# ── Added in Phase 4 ──────────────────────────────────────────────────────────
-# Anomaly — Z-score / IQR anomaly events flagged by the Anomaly Detection Agent
+class AnomalyAlert(Base):
+    """
+    One anomaly event raised by the Anomaly Detection Agent.
+
+    detector   : which algorithm fired ('zscore', 'iqr', 'isolation_forest')
+    feature    : which indicator was anomalous ('rsi_14', 'multivariate', …)
+    score      : detector-specific magnitude (|z|, IQR multiplier, IF score)
+    severity   : 'low' | 'medium' | 'high' derived from score thresholds
+    """
+    __tablename__ = "anomaly_alerts"
+    __table_args__ = (
+        UniqueConstraint(
+            "symbol", "timestamp", "interval", "detector", "feature",
+            name="uq_anomaly_symbol_ts_interval_detector_feature",
+        ),
+    )
+
+    id            = Column(Integer, primary_key=True, autoincrement=True)
+    symbol        = Column(String(20),     nullable=False, index=True)
+    asset_type    = Column(String(10),     nullable=False)
+    timestamp     = Column(DateTime(timezone=True), nullable=False, index=True)
+    interval      = Column(String(10),     nullable=False)
+    detector      = Column(String(30),     nullable=False)
+    feature       = Column(String(50),     nullable=False)
+    feature_value = Column(Numeric(30, 4), nullable=True)
+    score         = Column(Numeric(18, 6), nullable=False)
+    severity      = Column(String(10),     nullable=False, default="medium")
+    created_at    = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    def __repr__(self) -> str:
+        return (
+            f"<AnomalyAlert {self.symbol} {self.timestamp} "
+            f"{self.detector}/{self.feature} score={self.score} [{self.severity}]>"
+        )
