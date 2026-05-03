@@ -191,3 +191,27 @@ class AnomalyAlert(Base):
             f"<AnomalyAlert {self.symbol} {self.timestamp} "
             f"{self.detector}/{self.feature} score={self.score} [{self.severity}]>"
         )
+
+
+class AnalysisReport(Base):
+    """
+    One GPT-4o generated market analysis for a single symbol.
+
+    A new row is inserted on every pipeline run — full history is kept.
+    model = 'mock' when Azure OpenAI is not configured (local dev).
+    """
+    __tablename__ = "analysis_reports"
+
+    id                = Column(Integer, primary_key=True, autoincrement=True)
+    symbol            = Column(String(20), nullable=False, index=True)
+    asset_type        = Column(String(10), nullable=False)
+    generated_at      = Column(DateTime(timezone=True), nullable=False)
+    model             = Column(String(50), nullable=False)
+    prompt_tokens     = Column(Integer,    nullable=False, default=0)
+    completion_tokens = Column(Integer,    nullable=False, default=0)
+    report_text       = Column(Text,       nullable=False)
+    alert_count       = Column(Integer,    nullable=False, default=0)
+    created_at        = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    def __repr__(self) -> str:
+        return f"<AnalysisReport {self.symbol} {self.generated_at} model={self.model}>"
