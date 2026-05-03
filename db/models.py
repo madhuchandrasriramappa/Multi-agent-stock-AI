@@ -102,6 +102,60 @@ class CleanMarketData(Base):
         return f"<CleanMarketData {self.symbol} {self.timestamp} close={self.close}{flag}>"
 
 
-# ── Added in later phases ──────────────────────────────────────────────────────
-# FeatureSet  — Phase 3: moving averages, RSI, Bollinger Bands, volatility
-# Anomaly     — Phase 4: Z-score / IQR anomaly events
+class FeatureSet(Base):
+    """
+    Computed technical indicators for every (symbol, timestamp, interval) row
+    in clean_market_data.  Produced by the Feature Engineering Agent.
+
+    All indicator columns are nullable — early rows in a series don't have
+    enough history to compute a 20-period moving average, for example.
+    Phase 4 (Anomaly Detection) only reads rows where the needed columns
+    are non-null.
+    """
+    __tablename__ = "feature_set"
+    __table_args__ = (
+        UniqueConstraint(
+            "symbol", "timestamp", "interval",
+            name="uq_feature_symbol_ts_interval",
+        ),
+    )
+
+    id               = Column(Integer, primary_key=True, autoincrement=True)
+    symbol           = Column(String(20),     nullable=False, index=True)
+    asset_type       = Column(String(10),     nullable=False)
+    timestamp        = Column(DateTime(timezone=True), nullable=False, index=True)
+    interval         = Column(String(10),     nullable=False)
+
+    # Raw price/volume kept for reference (avoids joins in downstream queries)
+    close            = Column(Numeric(18, 6), nullable=False)
+    volume           = Column(Numeric(24, 4), nullable=False)
+
+    # ── Moving averages ────────────────────────────────────────────────────────
+    sma_20           = Column(Numeric(18, 6), nullable=True)
+    sma_50           = Column(Numeric(18, 6), nullable=True)
+    ema_12           = Column(Numeric(18, 6), nullable=True)
+    ema_26           = Column(Numeric(18, 6), nullable=True)
+
+    # ── Oscillators ───────────────────────────────────────────────────────────
+    rsi_14           = Column(Numeric(8,  4),  nullable=True)   # 0 – 100
+    macd_line        = Column(Numeric(18, 6),  nullable=True)
+    macd_signal      = Column(Numeric(18, 6),  nullable=True)
+    macd_histogram   = Column(Numeric(18, 6),  nullable=True)
+
+    # ── Bollinger Bands (20-period, 2 std devs) ───────────────────────────────
+    bb_upper         = Column(Numeric(18, 6), nullable=True)
+    bb_middle        = Column(Numeric(18, 6), nullable=True)
+    bb_lower         = Column(Numeric(18, 6), nullable=True)
+
+    # ── Volatility & VWAP ────────────────────────────────────────────────────
+    volatility_14    = Column(Numeric(10, 6), nullable=True)    # rolling std of returns
+    vwap             = Column(Numeric(18, 6), nullable=True)    # resets each UTC day
+
+    created_at       = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    def __repr__(self) -> str:
+        return f"<FeatureSet {self.symbol} {self.timestamp} rsi={self.rsi_14}>"
+
+
+# ── Added in Phase 4 ──────────────────────────────────────────────────────────
+# Anomaly — Z-score / IQR anomaly events flagged by the Anomaly Detection Agent
